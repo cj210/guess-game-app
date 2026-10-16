@@ -1,4 +1,4 @@
-fastapi — API framework.
-uvicorn[standard] — development server.
-pytest — unit testing.
-httpx — useful later for testing FastAPI endpoints with TestClient
+fastapi
+uvicorn[standard]
+pytest
+httpx
