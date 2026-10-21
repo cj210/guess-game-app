@@ -14,6 +14,9 @@ __pycache__/
 .coverage
 htmlcov/
 
+# Package utilities
+*egg-info/
+
 # Environment variables and secrets
 .env
 .env.*
