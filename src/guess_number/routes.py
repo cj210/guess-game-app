@@ -1,11 +1,50 @@
+import jwt
 from fastapi import APIRouter, HTTPException
+from datetime import datetime, timezone, timedelta
 from uuid import uuid4
-from guess_number.models import GuessRequest, GameSession
+from guess_number.models import GuessRequest, GameSession, UserRegister, TokenResponse
 from guess_number.core import validate_guess, guess_compare
 
 cashew: APIRouter = APIRouter()
 
 sessions: dict[str, GameSession] = {}
+
+users: dict[str, str] = {"kali": "abc"}
+
+SECRET_KEY = "bisket-key-for-bisket-app"
+
+ALGORITHM = "HS256"
+
+@cashew.post("/register")
+def user_register(user_data: UserRegister) -> dict:
+    if user_data.username in users:
+        raise HTTPException(401, "User already existing")
+    else:
+        users[user_data.username] = user_data.password
+
+    return {
+            "message": f"User {user_data.username} has been created succesfully!",
+            "status": "success",
+            }
+
+
+@cashew.post("/login")
+def user_login(user_data: UserRegister) -> dict:
+    if user_data.username not in users:
+        raise HTTPException(401, "Invalid Username or Password")
+    if users[user_data.username] != user_data.password:
+        raise HTTPException(401, "Invalid Username or Password")
+    expire = datetime.now(timezone.utc) + timedelta(minutes=30)
+    payload = {
+            "sub": user_data.username,
+            "exp": expire,
+            }
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return {
+            "access_token": token,
+            "token_type": "bearer",
+            }
+
 
 @cashew.post("/sessions")
 def create_session() -> dict:
