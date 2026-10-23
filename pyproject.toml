@@ -12,6 +12,8 @@ dependencies = [
     "uvicorn[standard]",
     "httpx2",
     "pyjwt",
+    "pwdlib[argon2]",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]

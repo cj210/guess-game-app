@@ -1,81 +1,39 @@
-import jwt
 from fastapi import APIRouter, HTTPException
-from datetime import datetime, timezone, timedelta
-from uuid import uuid4
-from guess_number.models import GuessRequest, GameSession, UserRegister, TokenResponse
-from guess_number.core import validate_guess, guess_compare
+from pwdlib import PasswordHash
+
+from guess_number.models import UserRegister, RegisterResponse, LoginResponse
+from guess_number.security import create_access_token
+
 
 cashew: APIRouter = APIRouter()
 
-sessions: dict[str, GameSession] = {}
+hasher: PasswordHash = PasswordHash.recommended()
 
-users: dict[str, str] = {"kali": "abc"}
+users: dict[str, str] = {}
 
-SECRET_KEY = "bisket-key-for-bisket-app"
-
-ALGORITHM = "HS256"
-
-@cashew.post("/register")
-def user_register(user_data: UserRegister) -> dict:
+@cashew.post("/register", status_code=201, response_model=RegisterResponse)
+def user_register(user_data: UserRegister):
     if user_data.username in users:
-        raise HTTPException(401, "User already existing")
-    else:
-        users[user_data.username] = user_data.password
-
+        raise HTTPException(409, "Username already exists!!")
+    users[user_data.username] = hasher.hash(user_data.password)
     return {
-            "message": f"User {user_data.username} has been created succesfully!",
-            "status": "success",
-            }
-
-
-@cashew.post("/login")
-def user_login(user_data: UserRegister) -> dict:
-    if user_data.username not in users:
-        raise HTTPException(401, "Invalid Username or Password")
-    if users[user_data.username] != user_data.password:
-        raise HTTPException(401, "Invalid Username or Password")
-    expire = datetime.now(timezone.utc) + timedelta(minutes=30)
-    payload = {
-            "sub": user_data.username,
-            "exp": expire,
-            }
-    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-    return {
-            "access_token": token,
-            "token_type": "bearer",
-            }
-
-
-@cashew.post("/sessions")
-def create_session() -> dict:
-    session_id: str = str(uuid4())
-    session: GameSession = GameSession(id=session_id)
-    sessions[session_id] = session
-    return {
-        "session_id": session_id,
-        "status": session.status,
+        "detail": "User creation successful",
+        "message": f"User {user_data.username} created succesfully",
     }
-
-@cashew.post("/sessions/{session_id}/guesses")
-def respond_to_guess(session_id: str, request: GuessRequest) -> dict:
-    current_session: GameSession | None = sessions.get(session_id, None)
-    if current_session:
-        if current_session.status == "complete":
-            raise HTTPException(409, "Not available for a completed session")
-        else:
-            valid_guess = validate_guess(request.guess)
-            if valid_guess:
-                message = guess_compare(valid_guess, current_session.secret)
-                current_session.attempts -= 1
-                if message == "You got it" or current_session.attempts == 0:
-                    current_session.status = "complete"
-                return {
-                    "message": message,
-                    "attempts": current_session.attempts,
-                    "status": current_session.status,
-                }
-            else:
-                raise HTTPException(422, "Unprocessible entity: Please enter number between 1 and 100")
+    
+@cashew.post("/login", status_code=200, response_model=LoginResponse)
+def user_login(user_data: UserRegister):
+    if user_data.username not in users:
+        raise HTTPException(401, "Invalid Username or Password!")
+    if hasher.verify(user_data.password, users[user_data.username]):
+        return {
+            "detail": "User login Successful!!",
+            "message": f"Logged in as {user_data.username}",
+            "access_token": create_access_token(user_data.username),
+            "token_type": "bearer"
+        }
     else:
-        raise HTTPException(404, "Session doesn't exist")
+        raise HTTPException(401, "Invalid Username or Password!")
         
+    
+
