@@ -1,7 +1,9 @@
 from fastapi import FastAPI
-from guess_number.routes import cashew
+from guess_number.routes import palm_tree
 
 
 
-bisket: FastAPI = FastAPI(title="Guess the Number")
-bisket.include_router(cashew)
+
+forest: FastAPI = FastAPI(title="Guess the Number")
+
+forest.include_router(palm_tree)

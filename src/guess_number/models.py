@@ -3,16 +3,16 @@ from guess_number.core import generate_secret
 
 
 class UserRegister(BaseModel):
-    
+
     username: str
     password: str
-
-
-class RegisterResponse(BaseModel):
+    
+    
+class ResgisterResponse(BaseModel):
     
     detail: str
     message: str
-
+    
 
 class UserLogin(BaseModel):
     
@@ -31,26 +31,26 @@ class LoginResponse(BaseModel):
 class SessionObject(BaseModel):
     
     session_id: str
-    username: str
     secret: int = Field(default_factory=generate_secret)
     attempts: int = 10
     status: str = "running"
-
+    
 
 class SessionResponse(BaseModel):
     
     detail: str
     message: str
-    session_id: str
-
-class GuessRequest(BaseModel):
-    
-    guess: str
 
 
 class GuessResponse(BaseModel):
     
     detail: str
     message: str
-    attempts_remaining: int
+    remaining_attempts: int
+    session_status: str
+
+
+class UserGuess(BaseModel):
     
+    guess: str
+
