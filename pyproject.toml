@@ -14,13 +14,14 @@ dependencies = [
     "pyjwt",
     "pwdlib[argon2]",
     "python-dotenv",
-	"python-multipart",
+    "python-multipart",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
     "pytest-mock",
+    "pytest-playwright",
 ]
 
 [tool.pytest.ini_options]
