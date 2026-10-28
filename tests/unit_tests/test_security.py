@@ -52,6 +52,8 @@ class TestAccessToken:
             verify_access_token(token+"ding")
         assert exc_info.value.status_code == 401
         assert exc_info.value.detail == "Couldn't validate credentials"
+        assert exc_info.value.headers is not None
+        assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
     
     def test_verify_access_token_invalid_token(self):
         now = datetime.now(timezone.utc)
@@ -65,6 +67,8 @@ class TestAccessToken:
             verify_access_token(token)
         assert exc_info.value.status_code == 401
         assert exc_info.value.detail == "Invalid or expired token"
+        assert exc_info.value.headers is not None
+        assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
             
     @pytest.mark.parametrize(
         "dummy",
@@ -93,6 +97,8 @@ class TestAccessToken:
             get_current_user(token)
         assert exc_info.value.status_code == 401
         assert exc_info.value.detail == "Invalid / Missing subject (username)!"
+        assert exc_info.value.headers is not None
+        assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
         
     def test_get_current_user_with_no_sub_claim(self):
         now = datetime.now(timezone.utc)
@@ -105,8 +111,25 @@ class TestAccessToken:
             get_current_user(token)
         assert exc_info.value.status_code == 401
         assert exc_info.value.detail == "Invalid / Missing subject (username)!"
+        assert exc_info.value.headers is not None
+        assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
 
         
+    def test_get_current_user_with_blank_sub_clain(self):
+        now = datetime.now(timezone.utc)
+        payload = {
+            "sub": "              ",
+            "iat": now,
+            "exp": now + timedelta(minutes=EXPIRY_TIME)
+        }
+        token = jwt.encode(payload, SECRET_KEY, ALGORITHM)
+        with pytest.raises(HTTPException) as exc_info:
+            get_current_user(token)
+        assert exc_info.value.status_code == 401
+        assert exc_info.value.detail == "Invalid / Missing subject (username)!"
+        assert exc_info.value.headers is not None
+        assert exc_info.value.headers["WWW-Authenticate"] == "Bearer"
+
 
         
         

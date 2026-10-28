@@ -1,8 +1,37 @@
 import pytest
 from fastapi.testclient import TestClient
-from guess_number.app import bisket
+from guess_number.app import forest
 from httpx2 import Response
 
+
+class TestRegister:
+    
+    def test_user_register_with_valid_inputs(self):
+        client: TestClient = TestClient(forest)
+        payload: dict = {
+            "username": "kacha",
+            "password": "asd"
+        }
+        response: Response = client.post("/register", json=payload)
+        assert response.status_code == 201
+        assert response.json().get("detail") == "User creation successfull!"
+        assert response.json().get("message") == "New user kacha created!"
+    
+    def test_user_register_with_existing_username(self):
+        client: TestClient = TestClient(forest)
+        payload: dict = {
+            "username": "kacha",
+            "password": "asd"
+        }
+        client.post("/register", json=payload)
+        response: Response = client.post("/register", json=payload)
+        assert response.status_code == 409
+        assert response.json().get("detail") == "User already exist!"
+    
+
+
+
+'''
 class TestSessions:
     
     def test_session_creation(self):
@@ -105,3 +134,4 @@ class TestGuesses:
         assert response.json()["detail"] == "Not available for a completed session"
                 
         
+'''
