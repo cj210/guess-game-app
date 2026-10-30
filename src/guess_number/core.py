@@ -8,7 +8,6 @@ def validate_guess(n: str) -> int:
     if n.isnumeric():
         if int(n) > 0 and int(n) < 101:
             return int(n)
-    print("Not a valid number")
     return 0
 
 def guess_compare(guess: int, secret: int) -> str:
@@ -25,7 +24,6 @@ def runner(secret: int) -> bool:
         user_input: str = input("Enter number between 1 and 100: ")
         guess: int = validate_guess(user_input)
     message: str = guess_compare(guess, secret)
-    print(message)
     return message == "You got it"
     
 def user_continue() -> bool:

@@ -16,4 +16,4 @@ class TestModels:
             access_token="fake_access_token"
         )
         assert response.token_type == "bearer"
-
+    

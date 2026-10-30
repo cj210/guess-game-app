@@ -35,9 +35,9 @@ def user_login(username: str = Form(), password: str = Form()) -> LoginResponse:
                 access_token=create_access_token(username)
             )
         else:
-            raise HTTPException(status_code=401, detail="Invalid username or password")
+            raise HTTPException(status_code=401, detail="Invalid username or password!")
     else:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
+        raise HTTPException(status_code=401, detail="Invalid username or password!")
     
 @palm_tree.post("/sessions", status_code=201, response_model=SessionResponse)
 def create_session(response: Response, username: str = Depends(get_current_user)) -> SessionResponse:

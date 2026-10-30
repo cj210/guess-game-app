@@ -19,7 +19,7 @@ def api_url():
     base = env_vars.get("test_base", "127.0.0.1").rstrip("/:")
     port = find_free_port()
 
-    server_process = Popen(
+    server_process = subprocess.Popen(
             ["uvicorn", "src.guess_number.app:forest", "--host", base, "--port", str(port),],
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE,
